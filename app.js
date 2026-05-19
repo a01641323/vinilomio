@@ -97,6 +97,20 @@
     });
   }
 
+  /* ─── mobile preview flash ─────────────────────────── */
+  let _flashTimer = null;
+  function flashPreview() {
+    if (!window.matchMedia("(max-width: 960px)").matches) return;
+    const stage = $(".preview-stage");
+    const left  = $(".config__left");
+    if (!stage || !left) return;
+    clearTimeout(_flashTimer);
+    stage.scrollIntoView({ behavior: "smooth", block: "start" });
+    _flashTimer = setTimeout(() => {
+      left.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 1100);
+  }
+
   /* ─── reveal on scroll ──────────────────────────────── */
   function initReveal() {
     const io = new IntersectionObserver(
@@ -190,6 +204,8 @@
         state.framed = false;
       }
       render();
+      // on mobile, briefly scroll up to show the preview update then return
+      if (!isPill) flashPreview();
     });
   }
 
@@ -206,6 +222,13 @@
 
   /* ─── uploads ───────────────────────────────────────── */
   function initUploads() {
+    const isTouch = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
+    if (isTouch) {
+      // simplify dropzone text for touch devices — no drag instructions
+      $$(".dropzone__title").forEach((el) => { el.textContent = "Toca para elegir imagen"; });
+      $$(".dropzone__sub").forEach((el) => { el.innerHTML = "JPG o PNG · máx 5MB"; });
+    }
+
     $$("[data-dropzone]").forEach((zone) => {
       const key = zone.dataset.dropzone;
       const input = zone.querySelector("[data-upload]");
@@ -215,14 +238,16 @@
         const file = e.target.files?.[0];
         if (file) handleFile(file, key, zone);
       });
-      ["dragenter", "dragover"].forEach((ev) =>
-        zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add("is-drag"); }));
-      ["dragleave", "drop"].forEach((ev) =>
-        zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove("is-drag"); }));
-      zone.addEventListener("drop", (e) => {
-        const file = e.dataTransfer?.files?.[0];
-        if (file) handleFile(file, key, zone);
-      });
+      if (!isTouch) {
+        ["dragenter", "dragover"].forEach((ev) =>
+          zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add("is-drag"); }));
+        ["dragleave", "drop"].forEach((ev) =>
+          zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove("is-drag"); }));
+        zone.addEventListener("drop", (e) => {
+          const file = e.dataTransfer?.files?.[0];
+          if (file) handleFile(file, key, zone);
+        });
+      }
     });
     $$("[data-remove]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -252,6 +277,7 @@
       inner.hidden = true;
       prev.hidden = false;
       img.src = dataUrl;
+      flashPreview();
     } else {
       inner.hidden = false;
       prev.hidden = true;

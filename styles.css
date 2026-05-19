@@ -31,7 +31,7 @@
 /* ─── reset ──────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: hidden; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; overflow-x: hidden; touch-action: pan-y; overscroll-behavior-x: none; }
 body {
   background: var(--ink);
   color: var(--cream);
@@ -382,6 +382,7 @@ body::after {
 .steps {
   position: relative;
   min-height: 420px;
+  overflow-x: clip;
 }
 .step {
   position: absolute;
