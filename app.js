@@ -28,7 +28,7 @@
     labelText: "",
     qrEnabled: false, qrLink: "",
     ownSongsEnabled: false,
-    sleeve: "none",
+    sleeve: "basic",
     sleeveFrontDataUrl: null,
     sleeveBackEnabled: false, sleeveBackDataUrl: null,
     sleeveText: "",
@@ -107,12 +107,17 @@
   }
 
   /* ─── hero CTA on scroll ────────────────────────────── */
+  function hideCTA() {
+    const cta = $("[data-scroll-cta]");
+    if (cta) { cta.classList.remove("is-visible"); cta.classList.add("is-done"); }
+  }
+
   function initScrollCTA() {
     const cta = $("[data-scroll-cta]");
     if (!cta) return;
     let ticking = false;
     const onScroll = () => {
-      if (ticking) return;
+      if (ticking || cta.classList.contains("is-done")) return;
       ticking = true;
       requestAnimationFrame(() => {
         const ratio = window.scrollY / window.innerHeight;
@@ -122,6 +127,7 @@
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
+    cta.addEventListener("click", hideCTA, { once: true });
   }
 
   /* ─── steps ─────────────────────────────────────────── */
@@ -132,10 +138,10 @@
     const dirForward = next > prev;
     const prevEl = $(`.step[data-step="${prev}"]`);
     const nextEl = $(`.step[data-step="${next}"]`);
+    if (dirForward) hideCTA();
     if (prevEl) {
       prevEl.classList.remove("is-active");
       if (dirForward) prevEl.classList.add("is-leaving-left");
-      // clear leftover transform
       requestAnimationFrame(() => prevEl.classList.remove("is-leaving-left"));
     }
     if (nextEl) nextEl.classList.add("is-active");
@@ -176,6 +182,12 @@
         set(key, !wasPressed);
       } else {
         set(key, value);
+      }
+      // mutual exclusion: funda con diseño ↔ enmarcado (never both, never neither)
+      if (key === "framed" && value === true) {
+        state.sleeve = "none";
+      } else if (key === "sleeve" && value !== "none") {
+        state.framed = false;
       }
       render();
     });
@@ -307,18 +319,40 @@
     const stage = $("#previewStage");
     stage.dataset.size = state.size;
 
+    // label radius: 7" record has a proportionally larger label than 12"
+    const LABEL_R = state.size === "7" ? 82 : 60;
+    const scale = LABEL_R / 60;
+
     // meta line
     const metaParts = [`${state.size}"`];
-    metaParts.push(SLEEVE_LABEL[state.sleeve].toLowerCase());
     if (state.framed) metaParts.push("enmarcado");
+    else metaParts.push(SLEEVE_LABEL[state.sleeve].toLowerCase());
     $("[data-preview-meta]").textContent = metaParts.join(" · ");
 
-    // label content: image or wordmark
+    // update clip path and label bg radius
+    const clipCircle = document.querySelector("#labelClipPreview circle");
+    if (clipCircle) clipCircle.setAttribute("r", LABEL_R);
+
     const labelBg   = $("[data-label-bg]");
     const markTop   = $("[data-label-mark-top]");
     const markBot   = $("[data-label-mark-bottom]");
     const labelGrp  = $("[data-label-group]");
     const customTxt = $("[data-label-text]");
+
+    labelBg.setAttribute("r", LABEL_R);
+
+    // scale wordmark positions and font size
+    markTop.setAttribute("y", (-12 * scale).toFixed(1));
+    markBot.setAttribute("y", (32 * scale).toFixed(1));
+    const wSize = Math.round(32 * scale);
+    markTop.style.fontSize = `${wSize}px`;
+    markBot.style.fontSize = `${wSize}px`;
+
+    // custom text — always inside the label circle
+    customTxt.setAttribute("y", (LABEL_R - 10).toFixed(0));
+
+    // QR hint — inside the label at bottom centre
+    $("[data-qr-hint]").setAttribute("transform", `translate(0, ${(LABEL_R - 20).toFixed(0)})`);
 
     // remove existing image
     const existing = labelGrp.querySelector("image");
@@ -331,10 +365,10 @@
       const ns = "http://www.w3.org/2000/svg";
       const img = document.createElementNS(ns, "image");
       img.setAttribute("href", state.labelPhotoDataUrl);
-      img.setAttribute("x", "-60");
-      img.setAttribute("y", "-60");
-      img.setAttribute("width", "120");
-      img.setAttribute("height", "120");
+      img.setAttribute("x", -LABEL_R);
+      img.setAttribute("y", -LABEL_R);
+      img.setAttribute("width", LABEL_R * 2);
+      img.setAttribute("height", LABEL_R * 2);
       img.setAttribute("clip-path", "url(#labelClipPreview)");
       img.setAttribute("preserveAspectRatio", "xMidYMid slice");
       labelGrp.appendChild(img);
@@ -344,26 +378,25 @@
       markBot.setAttribute("opacity", "1");
     }
 
-    // custom text under wordmark (only show if no photo or short text)
+    // custom text (only when no photo)
     customTxt.textContent = state.labelText ? state.labelText.toUpperCase() : "";
     customTxt.setAttribute("opacity", state.labelPhotoDataUrl ? "0" : (state.labelText ? "0.9" : "0"));
 
-    // QR hint
+    // QR hint opacity
     $("[data-qr-hint]").setAttribute("opacity", state.qrEnabled ? "0.85" : "0");
 
     // frame overlay
     $("[data-frame-overlay]").setAttribute("opacity", state.framed ? "1" : "0");
 
-    // sleeve mock
+    // sleeve mock — scale with disc size
     const sleeveMock = $("[data-sleeve-mock]");
     const sleeveImg  = $("[data-sleeve-img]");
     const sleeveTxt  = $("[data-sleeve-mock-text]");
+    sleeveMock.style.width = state.size === "12" ? "70%" : "55%";
     if (state.sleeve === "designed" && state.sleeveFrontDataUrl) {
       sleeveMock.hidden = false;
       sleeveImg.src = state.sleeveFrontDataUrl;
       sleeveTxt.textContent = state.sleeveText || "";
-    } else if (state.sleeve === "basic") {
-      sleeveMock.hidden = true; // basic = transparent sleeve, no visual
     } else {
       sleeveMock.hidden = true;
     }
@@ -476,6 +509,22 @@
 
   function showTelegram() {
     const tg = $("[data-telegram]");
+    // populate uploaded images so the brand owner can forward/attach them
+    const container = $("[data-telegram-imgs]");
+    if (container) {
+      const uploads = [
+        { key: "labelPhotoDataUrl",   label: "Foto etiqueta" },
+        { key: "sleeveFrontDataUrl",  label: "Portada delantera" },
+        { key: "sleeveBackDataUrl",   label: "Portada trasera" },
+      ].filter((u) => state[u.key]);
+      if (uploads.length) {
+        container.hidden = false;
+        container.innerHTML = `<p class="tg-imgs__note">Adjuntá estas imágenes al correo que se acaba de abrir:</p>
+          <div class="tg-imgs__grid">${uploads.map((u) =>
+            `<figure class="tg-imgs__item"><img src="${state[u.key]}" alt="${u.label}" /><figcaption>${u.label}</figcaption></figure>`
+          ).join("")}</div>`;
+      }
+    }
     tg.hidden = false;
     tg.scrollIntoView({ behavior: "smooth", block: "center" });
   }
