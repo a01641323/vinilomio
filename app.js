@@ -377,9 +377,8 @@
     // custom text — always inside the label circle
     customTxt.setAttribute("y", (LABEL_R - 10).toFixed(0));
 
-    // QR hint — right side of the label, clear of centered text
-    $("[data-qr-hint]").setAttribute("transform",
-      `translate(${(LABEL_R * 0.7).toFixed(1)}, ${(LABEL_R * 0.2).toFixed(1)})`);
+    // QR hint — inside the label at bottom centre
+    $("[data-qr-hint]").setAttribute("transform", `translate(0, ${(LABEL_R - 20).toFixed(0)})`);
 
     // remove existing image
     const existing = labelGrp.querySelector("image");
@@ -419,7 +418,7 @@
     const sleeveMock = $("[data-sleeve-mock]");
     const sleeveImg  = $("[data-sleeve-img]");
     const sleeveTxt  = $("[data-sleeve-mock-text]");
-    sleeveMock.style.width = state.size === "12" ? "70%" : "80%";
+    sleeveMock.style.width = state.size === "12" ? "70%" : "55%";
     if (state.sleeve === "designed" && state.sleeveFrontDataUrl) {
       sleeveMock.hidden = false;
       sleeveImg.src = state.sleeveFrontDataUrl;
@@ -491,10 +490,8 @@
     const summary = buildPlainSummary();
     const subject = `Nuevo pedido — ${state.customer.name}`;
     const url = `mailto:hg.matias.a@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(summary)}`;
+    // open in same tab; user's mail client takes over
     window.location.href = url;
-
-    // auto-download uploaded images so the user can attach them to the email
-    downloadUploadedImages();
 
     showTelegram();
   }
@@ -536,24 +533,6 @@
     return lines.join("\n");
   }
 
-  function downloadUploadedImages() {
-    const imgs = [
-      { key: "labelPhotoDataUrl",  name: "etiqueta" },
-      { key: "sleeveFrontDataUrl", name: "portada-delantera" },
-      { key: "sleeveBackDataUrl",  name: "portada-trasera" },
-    ];
-    imgs.forEach(({ key, name }) => {
-      if (!state[key]) return;
-      const ext = state[key].startsWith("data:image/png") ? "png" : "jpg";
-      const a = document.createElement("a");
-      a.href = state[key];
-      a.download = `vinilomio-${name}.${ext}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    });
-  }
-
   function showTelegram() {
     const tg = $("[data-telegram]");
     // populate uploaded images so the brand owner can forward/attach them
@@ -566,7 +545,7 @@
       ].filter((u) => state[u.key]);
       if (uploads.length) {
         container.hidden = false;
-        container.innerHTML = `<p class="tg-imgs__note">Las imágenes se descargaron automáticamente — adjuntalas al correo:</p>
+        container.innerHTML = `<p class="tg-imgs__note">Adjuntá estas imágenes al correo que se acaba de abrir:</p>
           <div class="tg-imgs__grid">${uploads.map((u) =>
             `<figure class="tg-imgs__item"><img src="${state[u.key]}" alt="${u.label}" /><figcaption>${u.label}</figcaption></figure>`
           ).join("")}</div>`;
