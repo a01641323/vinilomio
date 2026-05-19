@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Vinilo Mío · Discos decorativos personalizados · CDMX</title>
+<meta name="description" content="Discos de vinilo decorativos hechos a mano en la CDMX. Personalizá tu disco con tus fotos, tus canciones y tu historia. Envíos a todo México." />
+<meta name="theme-color" content="#0A0A0A" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@400;500;700&family=Unna:ital,wght@1,400;1,700&family=Caveat:wght@600;700&family=Courier+Prime:wght@400;700&display=swap" />
+
+<link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+<!-- ┌─────────────────────────────────────────────────────────┐ -->
+<!-- │ HERO                                                    │ -->
+<!-- └─────────────────────────────────────────────────────────┘ -->
+<header class="hero" id="hero">
+  <div class="hero__brand">
+    <span class="brand-mark">✦</span>
+    <span class="brand-name">Vinilo Mío</span>
+    <span class="brand-meta">CDMX · MX</span>
+  </div>
+
+  <div class="hero__grid">
+    <div class="hero__copy">
+      <p class="hero__eyebrow">Edición · Vol. I</p>
+      <h1 class="hero__title">Tu historia,<br/><em>en vinilo.</em></h1>
+      <p class="hero__sub">Discos decorativos personalizados · CDMX · Envíos a todo México</p>
+    </div>
+
+    <div class="hero__vinyl-wrap">
+      <!-- Vinyl SVG (spins continuously, pauses on hover) -->
+      <svg class="vinyl vinyl--hero" viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <radialGradient id="discShine" cx="50%" cy="40%" r="60%">
+            <stop offset="0%"  stop-color="#1c1c1c" />
+            <stop offset="60%" stop-color="#0d0d0d" />
+            <stop offset="100%" stop-color="#050505" />
+          </radialGradient>
+          <radialGradient id="discHighlight" cx="35%" cy="30%" r="40%">
+            <stop offset="0%"  stop-color="rgba(255,255,255,0.10)" />
+            <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+          </radialGradient>
+          <clipPath id="labelClipHero"><circle r="60" cx="0" cy="0" /></clipPath>
+        </defs>
+
+        <!-- Outer disc -->
+        <circle r="190" fill="url(#discShine)" />
+        <circle r="190" fill="url(#discHighlight)" />
+
+        <!-- Grooves (rendered by app.js for consistency) -->
+        <g class="vinyl__grooves" data-grooves></g>
+
+        <!-- Center label -->
+        <circle r="60" fill="#FFF3B0" />
+        <text class="vinyl__wordmark vinyl__wordmark--top"    x="0" y="-12" text-anchor="middle">Vinilo</text>
+        <text class="vinyl__wordmark vinyl__wordmark--bottom" x="0" y="32"  text-anchor="middle">Mío</text>
+        <circle r="3" fill="#0A0A0A" />
+      </svg>
+    </div>
+  </div>
+
+  <p class="hero__hint">desliza</p>
+
+  <a class="cta cta--scroll" href="#configurador" data-scroll-cta>
+    <span>✦ Crea tu vinilo</span>
+  </a>
+</header>
+
+
+<!-- ┌─────────────────────────────────────────────────────────┐ -->
+<!-- │ ABOUT                                                   │ -->
+<!-- └─────────────────────────────────────────────────────────┘ -->
+<section class="about" id="about">
+  <div class="about__grid">
+    <div class="about__quote" data-reveal>
+      <div class="rule rule--gold"></div>
+      <p>“Cada disco cuenta una historia que merece ser escuchada <em>— y vista.</em>”</p>
+    </div>
+    <div class="about__body" data-reveal>
+      <p>Hacemos discos decorativos a mano, uno por uno, en un pequeño taller de la Ciudad de México.</p>
+      <p>Cada pieza nace de un disco de vinilo reciclado: lo limpiamos, lo restauramos y lo convertimos en un objeto único pensado para colgarse en la pared y guardarse para siempre.</p>
+      <p>Envíos a toda la República. Acabados premium. Pedidos por mensaje.</p>
+    </div>
+  </div>
+
+  <ul class="about__features" data-reveal>
+    <li><span class="ft-emoji">🎵</span> Diseño 100% personalizable</li>
+    <li class="ft-sep">·</li>
+    <li><span class="ft-emoji">📦</span> Envíos a todo México</li>
+    <li class="ft-sep">·</li>
+    <li><span class="ft-emoji">✨</span> Acabados premium</li>
+  </ul>
+</section>
+
+
+<!-- ┌─────────────────────────────────────────────────────────┐ -->
+<!-- │ CONFIGURATOR                                            │ -->
+<!-- └─────────────────────────────────────────────────────────┘ -->
+<section class="config" id="configurador">
+
+  <div class="config__intro" data-reveal>
+    <p class="config__eyebrow">El estudio</p>
+    <h2 class="config__title">Crea tu vinilo</h2>
+    <p class="config__lede">Cinco pasos. Tu historia. Una pieza única, hecha en CDMX.</p>
+  </div>
+
+  <div class="config__shell">
+
+    <!-- LEFT: STEPS -->
+    <div class="config__left">
+      <!-- Progress -->
+      <div class="progress" aria-label="Progreso">
+        <div class="progress__label">
+          <span data-progress-label>Paso 1 de 5</span>
+          <span data-progress-name>Tamaño del disco</span>
+        </div>
+        <div class="progress__bar"><div class="progress__fill" data-progress-fill></div></div>
+      </div>
+
+      <!-- Steps -->
+      <div class="steps" data-steps>
+
+        <!-- ── PASO 1 ─────────────────────────────── -->
+        <section class="step is-active" data-step="1">
+          <h3 class="step__title">Elegí el tamaño del disco</h3>
+          <p class="step__lede">El formato define la presencia de tu pieza en la pared.</p>
+
+          <div class="cards cards--2">
+            <button type="button" class="toggle-card" data-pick="size" data-value="7" aria-pressed="false">
+              <div class="tc__mark">✦</div>
+              <div class="tc__title">7"</div>
+              <div class="tc__desc">Formato pequeño · Ideal para regalo</div>
+              <div class="tc__price">$299 MXN</div>
+            </button>
+            <button type="button" class="toggle-card" data-pick="size" data-value="12" aria-pressed="true">
+              <div class="tc__mark">✦</div>
+              <div class="tc__title">12"</div>
+              <div class="tc__desc">Formato LP completo · Mayor impacto visual</div>
+              <div class="tc__price">$499 MXN</div>
+            </button>
+          </div>
+        </section>
+
+
+        <!-- ── PASO 2 ─────────────────────────────── -->
+        <section class="step" data-step="2">
+          <h3 class="step__title">Personalizá la etiqueta</h3>
+          <p class="step__lede">La foto y el texto irán en el centro del disco.</p>
+
+          <label class="field-label">Foto de la etiqueta <span class="dim">(opcional)</span></label>
+          <div class="dropzone" data-dropzone="label">
+            <input type="file" accept="image/jpeg,image/png" data-upload="label" hidden />
+            <div class="dropzone__inner">
+              <div class="dropzone__icon">◐</div>
+              <div class="dropzone__title">Arrastrá tu foto aquí</div>
+              <div class="dropzone__sub">o <u>elegí un archivo</u> · JPG/PNG · máx 5MB</div>
+            </div>
+            <div class="dropzone__preview" data-preview="label" hidden>
+              <img alt="" data-preview-img="label" />
+              <button type="button" class="link-x" data-remove="label">Quitar</button>
+            </div>
+          </div>
+
+          <label class="field-label" for="labelText">Texto en la etiqueta <span class="dim">(opcional)</span></label>
+          <input id="labelText" class="text-input" type="text" maxlength="40" placeholder="Ej. Sofía & Mateo · 14.02.24" data-bind="labelText" />
+
+          <div class="toggle-row" data-toggle="qrEnabled">
+            <button type="button" class="toggle-pill" aria-pressed="false" data-pick="qrEnabled" data-value="true">
+              <span class="tp__dot"></span>
+              <span class="tp__label">¿Agregar código QR con tu canción favorita?</span>
+              <span class="tp__price">+$50 MXN</span>
+            </button>
+            <div class="toggle-extras" data-extras="qrEnabled" hidden>
+              <input class="text-input" type="url" placeholder="Pegá el link de tu canción (Spotify, YouTube, etc.)" data-bind="qrLink" />
+            </div>
+          </div>
+
+          <div class="toggle-row" data-toggle="ownSongsEnabled">
+            <button type="button" class="toggle-pill" aria-pressed="false" data-pick="ownSongsEnabled" data-value="true">
+              <span class="tp__dot"></span>
+              <span class="tp__label">¿Agregar canciones propias al disco?</span>
+              <span class="tp__price">+$150 MXN</span>
+            </button>
+            <div class="toggle-extras" data-extras="ownSongsEnabled" hidden>
+              <p class="note-italic">“Nos contactarás con tus archivos de audio tras confirmar el pedido.”</p>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ── PASO 3 ─────────────────────────────── -->
+        <section class="step" data-step="3">
+          <h3 class="step__title">La funda</h3>
+          <p class="step__lede">Protegé tu pieza con estilo.</p>
+
+          <div class="cards cards--3">
+            <button type="button" class="toggle-card" data-pick="sleeve" data-value="none" aria-pressed="true">
+              <div class="tc__mark">✦</div>
+              <div class="tc__title">Sin funda</div>
+              <div class="tc__desc">Solo el disco</div>
+              <div class="tc__price">incluido</div>
+            </button>
+            <button type="button" class="toggle-card" data-pick="sleeve" data-value="basic" aria-pressed="false">
+              <div class="tc__mark">✦</div>
+              <div class="tc__title">Funda básica</div>
+              <div class="tc__desc">Manga protectora transparente</div>
+              <div class="tc__price">+$80 MXN</div>
+            </button>
+            <button type="button" class="toggle-card" data-pick="sleeve" data-value="designed" aria-pressed="false">
+              <div class="tc__mark">✦</div>
+              <div class="tc__title">Funda con diseño</div>
+              <div class="tc__desc">Portada personalizada impresa</div>
+              <div class="tc__price">+$180 MXN</div>
+            </button>
+          </div>
+
+          <div class="sleeve-extras" data-sleeve-extras hidden>
+            <div class="rule"></div>
+
+            <label class="field-label">Portada delantera</label>
+            <div class="dropzone" data-dropzone="sleeveFront">
+              <input type="file" accept="image/jpeg,image/png" data-upload="sleeveFront" hidden />
+              <div class="dropzone__inner dropzone__inner--square">
+                <div class="dropzone__icon">▢</div>
+                <div class="dropzone__title">Arrastrá tu portada</div>
+                <div class="dropzone__sub">o <u>elegí un archivo</u></div>
+              </div>
+              <div class="dropzone__preview dropzone__preview--square" data-preview="sleeveFront" hidden>
+                <img alt="" data-preview-img="sleeveFront" />
+                <button type="button" class="link-x" data-remove="sleeveFront">Quitar</button>
+              </div>
+            </div>
+
+            <div class="toggle-row" data-toggle="sleeveBackEnabled">
+              <button type="button" class="toggle-pill" aria-pressed="false" data-pick="sleeveBackEnabled" data-value="true">
+                <span class="tp__dot"></span>
+                <span class="tp__label">¿Agregar diseño en la parte trasera de la funda?</span>
+                <span class="tp__price">+$80 MXN</span>
+              </button>
+              <div class="toggle-extras" data-extras="sleeveBackEnabled" hidden>
+                <label class="field-label">Portada trasera</label>
+                <div class="dropzone" data-dropzone="sleeveBack">
+                  <input type="file" accept="image/jpeg,image/png" data-upload="sleeveBack" hidden />
+                  <div class="dropzone__inner dropzone__inner--square">
+                    <div class="dropzone__icon">▢</div>
+                    <div class="dropzone__title">Arrastrá tu portada trasera</div>
+                    <div class="dropzone__sub">o <u>elegí un archivo</u></div>
+                  </div>
+                  <div class="dropzone__preview dropzone__preview--square" data-preview="sleeveBack" hidden>
+                    <img alt="" data-preview-img="sleeveBack" />
+                    <button type="button" class="link-x" data-remove="sleeveBack">Quitar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <label class="field-label" for="sleeveText">Texto para la funda <span class="dim">(opcional)</span></label>
+            <input id="sleeveText" class="text-input" type="text" maxlength="60" placeholder="Nombre del álbum, dedicatoria, fecha…" data-bind="sleeveText" />
+          </div>
+        </section>
+
+
+        <!-- ── PASO 4 ─────────────────────────────── -->
+        <section class="step" data-step="4">
+          <h3 class="step__title">Presentación final</h3>
+          <p class="step__lede">Cómo querés que llegue a su nueva pared.</p>
+
+          <div class="cards cards--2">
+            <button type="button" class="toggle-card" data-pick="framed" data-value="false" aria-pressed="true">
+              <div class="tc__mark">✦</div>
+              <div class="tc__title">Sin marco</div>
+              <div class="tc__desc">Para colgar libremente</div>
+              <div class="tc__price">incluido</div>
+            </button>
+            <button type="button" class="toggle-card" data-pick="framed" data-value="true" aria-pressed="false">
+              <div class="tc__mark">✦</div>
+              <div class="tc__title">Enmarcado</div>
+              <div class="tc__desc">Marco de madera negro para colgar</div>
+              <div class="tc__price">+$220 MXN</div>
+            </button>
+          </div>
+
+          <div class="rule"></div>
+
+          <h4 class="sub-head"><em>Envío</em></h4>
+          <div class="cards cards--2">
+            <button type="button" class="toggle-card toggle-card--slim" data-pick="shipping" data-value="standard" aria-pressed="true">
+              <div class="tc__title">Estándar</div>
+              <div class="tc__desc">5–7 días hábiles</div>
+              <div class="tc__price">$120 MXN</div>
+            </button>
+            <button type="button" class="toggle-card toggle-card--slim" data-pick="shipping" data-value="express" aria-pressed="false">
+              <div class="tc__title">Express</div>
+              <div class="tc__desc">2–3 días hábiles</div>
+              <div class="tc__price">$220 MXN</div>
+            </button>
+          </div>
+        </section>
+
+
+        <!-- ── PASO 5 ─────────────────────────────── -->
+        <section class="step" data-step="5">
+          <h3 class="step__title">Tus datos</h3>
+          <p class="step__lede">Para confirmar tu pedido y coordinar el envío.</p>
+
+          <form id="customerForm" novalidate>
+            <label class="field-label" for="cName">Nombre completo</label>
+            <input id="cName" class="text-input" type="text" required data-bind="customer.name" autocomplete="name" />
+
+            <label class="field-label" for="cEmail">Correo electrónico</label>
+            <input id="cEmail" class="text-input" type="email" required data-bind="customer.email" autocomplete="email" />
+
+            <label class="field-label" for="cPhone">Teléfono (WhatsApp)</label>
+            <input id="cPhone" class="text-input" type="tel" required data-bind="customer.phone" autocomplete="tel" placeholder="Ej. 55 1234 5678" />
+
+            <label class="field-label" for="cAddress">Dirección de envío</label>
+            <textarea id="cAddress" class="text-input text-area" rows="3" required data-bind="customer.address" placeholder="Calle, Número, Colonia, Ciudad, Estado, CP"></textarea>
+
+            <label class="field-label" for="cNotes">Notas adicionales <span class="dim">(opcional)</span></label>
+            <textarea id="cNotes" class="text-input text-area" rows="2" data-bind="customer.notes" placeholder="Algo que debamos saber…"></textarea>
+          </form>
+        </section>
+
+      </div>
+
+      <!-- Step nav -->
+      <div class="step-nav">
+        <button type="button" class="btn btn--ghost" data-nav="back">← Atrás</button>
+        <button type="button" class="btn btn--primary" data-nav="next">Siguiente →</button>
+      </div>
+    </div>
+
+
+    <!-- RIGHT: PREVIEW -->
+    <aside class="config__right">
+      <div class="preview-card">
+        <div class="preview-card__head">
+          <span class="preview-card__eyebrow">Vista previa</span>
+          <span class="preview-card__meta" data-preview-meta>12" · sin funda</span>
+        </div>
+
+        <div class="preview-stage" id="previewStage">
+          <!-- Sleeve mockup (behind disc) -->
+          <div class="sleeve-mock" data-sleeve-mock hidden>
+            <img alt="" data-sleeve-img />
+            <div class="sleeve-mock__text" data-sleeve-mock-text></div>
+          </div>
+
+          <!-- Vinyl preview SVG -->
+          <svg class="vinyl vinyl--preview" viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <radialGradient id="discShine2" cx="50%" cy="40%" r="60%">
+                <stop offset="0%"  stop-color="#1c1c1c" />
+                <stop offset="60%" stop-color="#0d0d0d" />
+                <stop offset="100%" stop-color="#050505" />
+              </radialGradient>
+              <radialGradient id="discHighlight2" cx="35%" cy="30%" r="40%">
+                <stop offset="0%"  stop-color="rgba(255,255,255,0.10)" />
+                <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+              </radialGradient>
+              <clipPath id="labelClipPreview"><circle r="60" cx="0" cy="0" /></clipPath>
+            </defs>
+
+            <circle r="190" fill="url(#discShine2)" />
+            <circle r="190" fill="url(#discHighlight2)" />
+            <g class="vinyl__grooves" data-grooves></g>
+
+            <!-- Label area (image OR solid + wordmark) -->
+            <g data-label-group>
+              <circle r="60" fill="#FFF3B0" data-label-bg />
+              <text class="vinyl__wordmark vinyl__wordmark--top"    x="0" y="-12" text-anchor="middle" data-label-mark-top>Vinilo</text>
+              <text class="vinyl__wordmark vinyl__wordmark--bottom" x="0" y="32"  text-anchor="middle" data-label-mark-bottom>Mío</text>
+            </g>
+
+            <!-- Custom text under wordmark -->
+            <text class="vinyl__custom" x="0" y="78" text-anchor="middle" data-label-text></text>
+
+            <!-- QR icon hint -->
+            <g data-qr-hint transform="translate(85,0)" opacity="0">
+              <rect x="-12" y="-12" width="24" height="24" fill="#0A0A0A" stroke="#F5ECD7" stroke-width="0.5"/>
+              <rect x="-9"  y="-9"  width="6" height="6" fill="#F5ECD7"/>
+              <rect x="3"   y="-9"  width="6" height="6" fill="#F5ECD7"/>
+              <rect x="-9"  y="3"   width="6" height="6" fill="#F5ECD7"/>
+              <rect x="3"   y="3"   width="2" height="2" fill="#F5ECD7"/>
+              <rect x="7"   y="3"   width="2" height="2" fill="#F5ECD7"/>
+              <rect x="3"   y="7"   width="2" height="2" fill="#F5ECD7"/>
+            </g>
+
+            <!-- Frame overlay -->
+            <g data-frame-overlay opacity="0">
+              <rect x="-198" y="-198" width="396" height="396" fill="none" stroke="#1a1208" stroke-width="14"/>
+              <rect x="-191" y="-191" width="382" height="382" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            </g>
+
+            <circle r="3" fill="#0A0A0A" />
+          </svg>
+        </div>
+
+        <!-- Receipt -->
+        <div class="receipt">
+          <div class="receipt__head">
+            <span>Vinilo Mío</span>
+            <span data-receipt-date>—</span>
+          </div>
+          <div class="receipt__rule"></div>
+          <dl class="receipt__items" data-receipt-items></dl>
+          <div class="receipt__rule receipt__rule--bold"></div>
+          <div class="receipt__total">
+            <span>TOTAL</span>
+            <span>$<span data-total>499</span> MXN</span>
+          </div>
+          <div class="receipt__foot">★ Hecho a mano · CDMX ★</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Telegram success card (hidden until submit) -->
+  <div class="telegram" data-telegram hidden>
+    <div class="telegram__inner">
+      <div class="telegram__stamp">★ TELEGRAMA ★</div>
+      <p class="telegram__line">✦ Pedido recibido — te contactaremos pronto ✦</p>
+      <p class="telegram__small">Tu cliente de correo debería haberse abierto con el resumen completo del pedido. Si no, escribinos por DM a <strong>@vinilomio.mx</strong>.</p>
+      <div class="telegram__cta-row">
+        <button type="button" class="btn btn--primary" data-action="pdf">Descargar resumen en PDF</button>
+        <button type="button" class="btn btn--ghost" data-action="another">Hacer otro pedido</button>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ┌─────────────────────────────────────────────────────────┐ -->
+<!-- │ FOOTER                                                  │ -->
+<!-- └─────────────────────────────────────────────────────────┘ -->
+<footer class="foot">
+  <div class="foot__inner">
+    <div class="foot__mark">Vinilo Mío</div>
+    <p class="foot__line"><em>Hecho con amor · CDMX · vinilomio.mx</em></p>
+    <p class="foot__meta">© 2026 · Discos decorativos personalizados · Pedidos por DM @vinilomio.mx</p>
+  </div>
+</footer>
+
+
+<!-- CDN libs -->
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="app.js" defer></script>
+
+</body>
+</html>
