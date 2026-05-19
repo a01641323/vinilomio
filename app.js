@@ -97,6 +97,25 @@
     });
   }
 
+  /* ─── play / pause vinyl ───────────────────────────── */
+  let playing = true;
+  function initPlayBtn() {
+    const btn = $("[data-play-btn]");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+      playing = !playing;
+      updatePlayState();
+    });
+  }
+  function updatePlayState() {
+    const btn    = $("[data-play-btn]");
+    const vinyl  = $(".vinyl--preview");
+    const arm    = $(".tonearm-arm");
+    if (btn)   btn.textContent = playing ? "❚❚" : "▶";
+    if (vinyl) vinyl.style.animationPlayState = playing ? "running" : "paused";
+    if (arm)   arm.classList.toggle("is-resting", !playing);
+  }
+
   /* ─── mobile preview flash ─────────────────────────── */
   let _flashTimer = null;
   function flashPreview() {
@@ -142,6 +161,16 @@
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     cta.addEventListener("click", hideCTA, { once: true });
+    // static hero CTA also dismisses the floating one
+    const heroCta = $("#heroCta");
+    if (heroCta) heroCta.addEventListener("click", hideCTA, { once: true });
+    // auto-dismiss once the configurator section enters the viewport
+    const configEl = $("#configurador");
+    if (configEl) {
+      new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) hideCTA();
+      }, { threshold: 0.05 }).observe(configEl);
+    }
   }
 
   /* ─── steps ─────────────────────────────────────────── */
@@ -761,6 +790,7 @@
     initBinds();
     initUploads();
     initActions();
+    initPlayBtn();
     render();
   }
 

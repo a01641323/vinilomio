@@ -9,7 +9,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@400;500;700&family=Unna:ital,wght@1,400;1,700&family=Caveat:wght@600;700&family=Courier+Prime:wght@400;700&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Bungee&family=Bungee+Shade&family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Caveat:wght@600;700&display=swap" />
 
 <link rel="stylesheet" href="styles.css" />
 </head>
@@ -21,19 +21,50 @@
 <!-- └─────────────────────────────────────────────────────────┘ -->
 <header class="hero" id="hero">
   <div class="hero__brand">
-    <span class="brand-mark">✦</span>
-    <span class="brand-name">Vinilo Mío</span>
+    <div class="brand-logo">VM</div>
+    <span class="brand-name">vinilomio</span>
     <span class="brand-meta">CDMX · MX</span>
+  </div>
+
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-strip__inner">
+      <span class="marquee-strip__item">envíos a todo méxico <span style="opacity:.5">✦</span> </span>
+      <span class="marquee-strip__item">pedidos por dm <span style="opacity:.5">✦</span> </span>
+      <span class="marquee-strip__item">diseñado en cdmx <span style="opacity:.5">✦</span> </span>
+      <span class="marquee-strip__item">regalos que suenan <span style="opacity:.5">✦</span> </span>
+      <span class="marquee-strip__item">tu canción en un vinilo de verdad <span style="opacity:.5">✦</span> </span>
+      <span class="marquee-strip__item">envíos a todo méxico <span style="opacity:.5">✦</span> </span>
+      <span class="marquee-strip__item">pedidos por dm <span style="opacity:.5">✦</span> </span>
+      <span class="marquee-strip__item">diseñado en cdmx <span style="opacity:.5">✦</span> </span>
+      <span class="marquee-strip__item">regalos que suenan <span style="opacity:.5">✦</span> </span>
+      <span class="marquee-strip__item">tu canción en un vinilo de verdad <span style="opacity:.5">✦</span> </span>
+    </div>
   </div>
 
   <div class="hero__grid">
     <div class="hero__copy">
-      <p class="hero__eyebrow">Edición · Vol. I</p>
-      <h1 class="hero__title">Tu historia,<br/><em>en vinilo.</em></h1>
-      <p class="hero__sub">Discos decorativos personalizados · CDMX · Envíos a todo México</p>
+      <p class="hero__eyebrow"><span class="eyebrow-dot"></span>en vivo · personaliza el tuyo</p>
+      <h1 class="hero__title"><span class="chrome-text">Tu historia,</span><br/><em>en vinilo.</em><span class="title-star">★</span></h1>
+      <p class="hero__sub"><em>Discos decorativos personalizados</em> — tu foto + tu canción + las palabras exactas. Hecho a mano en CDMX. Envíos a toda la República.</p>
+      <div class="hero__cta-row">
+        <a class="cta" href="#configurador" id="heroCta">diseña el tuyo →</a>
+      </div>
     </div>
 
     <div class="hero__vinyl-wrap">
+      <div class="vinyl-glow" aria-hidden="true"></div>
+      <div class="sticker sticker--pink" aria-hidden="true">
+        <span class="sticker__top">100%</span>
+        <span class="sticker__bot">hecho a mano</span>
+      </div>
+      <div class="sticker sticker--iris" aria-hidden="true">
+        <span class="sticker__top">33⅓</span>
+        <span class="sticker__bot">rpm vibe</span>
+      </div>
+      <div class="sticker sticker--mint" aria-hidden="true">
+        <span class="sticker__top">✦ envío</span>
+        <span class="sticker__bot">gratis +$899</span>
+      </div>
       <!-- Vinyl SVG (spins continuously, pauses on hover) -->
       <svg class="vinyl vinyl--hero" viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <defs>
@@ -57,7 +88,7 @@
         <g class="vinyl__grooves" data-grooves></g>
 
         <!-- Center label -->
-        <circle r="60" fill="#FFF3B0" />
+        <circle r="60" fill="#F4ED8C" />
         <text class="vinyl__wordmark vinyl__wordmark--top"    x="0" y="-12" text-anchor="middle">Vinilo</text>
         <text class="vinyl__wordmark vinyl__wordmark--bottom" x="0" y="32"  text-anchor="middle">Mío</text>
         <circle r="3" fill="#0A0A0A" />
@@ -128,6 +159,7 @@
 
         <!-- ── PASO 1 ─────────────────────────────── -->
         <section class="step is-active" data-step="1">
+          <span class="step__num">01 · Tamaño</span>
           <h3 class="step__title">Elegí el tamaño del disco</h3>
           <p class="step__lede">El formato define la presencia de tu pieza en la pared.</p>
 
@@ -150,6 +182,7 @@
 
         <!-- ── PASO 2 ─────────────────────────────── -->
         <section class="step" data-step="2">
+          <span class="step__num">02 · Etiqueta</span>
           <h3 class="step__title">Personalizá la etiqueta</h3>
           <p class="step__lede">La foto y el texto irán en el centro del disco.</p>
 
@@ -196,6 +229,7 @@
 
         <!-- ── PASO 3 ─────────────────────────────── -->
         <section class="step" data-step="3">
+          <span class="step__num">03 · Funda</span>
           <h3 class="step__title">La funda</h3>
           <p class="step__lede">Protegé tu pieza con estilo.</p>
 
@@ -262,6 +296,7 @@
 
         <!-- ── PASO 4 ─────────────────────────────── -->
         <section class="step" data-step="4">
+          <span class="step__num">04 · Presentación</span>
           <h3 class="step__title">Presentación final</h3>
           <p class="step__lede">Cómo querés que llegue a su nueva pared.</p>
 
@@ -300,6 +335,7 @@
 
         <!-- ── PASO 5 ─────────────────────────────── -->
         <section class="step" data-step="5">
+          <span class="step__num">05 · Datos</span>
           <h3 class="step__title">Tus datos</h3>
           <p class="step__lede">Para confirmar tu pedido y coordinar el envío.</p>
 
@@ -340,6 +376,18 @@
         </div>
 
         <div class="preview-stage" id="previewStage">
+          <!-- Tonearm overlay -->
+          <div class="tonearm-wrap" aria-hidden="true">
+            <div class="tonearm-pivot"></div>
+            <div class="tonearm-inner"></div>
+            <div class="tonearm-arm">
+              <div class="tonearm-head">
+                <div class="tonearm-needle"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Play / Pause -->
+          <button type="button" class="play-btn" aria-label="Pausar / reproducir" data-play-btn>❚❚</button>
           <!-- Sleeve mockup (behind disc) -->
           <div class="sleeve-mock" data-sleeve-mock hidden>
             <img alt="" data-sleeve-img />
@@ -367,7 +415,7 @@
 
             <!-- Label area (image OR solid + wordmark) -->
             <g data-label-group>
-              <circle r="60" fill="#FFF3B0" data-label-bg />
+              <circle r="60" fill="#F4ED8C" data-label-bg />
               <text class="vinyl__wordmark vinyl__wordmark--top"    x="0" y="-12" text-anchor="middle" data-label-mark-top>Vinilo</text>
               <text class="vinyl__wordmark vinyl__wordmark--bottom" x="0" y="32"  text-anchor="middle" data-label-mark-bottom>Mío</text>
             </g>
