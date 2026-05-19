@@ -142,6 +142,7 @@ body::after {
   border-bottom: 1px solid #0a0a0a;
   position: relative;
   z-index: 10;
+  flex-shrink: 0; /* prevent hero flexbox from crushing the strip */
 }
 .marquee-strip__inner {
   display: inline-flex;
@@ -192,6 +193,7 @@ body::after {
   z-index: 2;
   padding: clamp(0.9rem, 2vw, 1.3rem) var(--pad-x);
   border-bottom: 1px solid var(--rule);
+  flex-shrink: 0; /* prevent hero flexbox from crushing the nav bar */
 }
 
 .brand-logo {
