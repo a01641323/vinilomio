@@ -24,6 +24,7 @@
   const state = {
     step: 1,
     size: "12",
+    previewView: "disc-front",
     labelPhotoDataUrl: null,
     labelText: "",
     qrEnabled: false, qrLink: "",
@@ -108,12 +109,84 @@
     });
   }
   function updatePlayState() {
-    const btn    = $("[data-play-btn]");
-    const vinyl  = $(".vinyl--preview");
-    const arm    = $(".tonearm-arm");
-    if (btn)   btn.textContent = playing ? "❚❚" : "▶";
-    if (vinyl) vinyl.style.animationPlayState = playing ? "running" : "paused";
-    if (arm)   arm.classList.toggle("is-resting", !playing);
+    const btn  = $("[data-play-btn]");
+    const arm  = $(".tonearm-arm");
+    const isDisc = state.previewView.startsWith("disc");
+    if (btn) btn.textContent = playing ? "❚❚" : "▶";
+    $$(".vinyl--preview").forEach((v) => {
+      v.style.animationPlayState = playing ? "running" : "paused";
+    });
+    if (arm) {
+      arm.classList.toggle("is-resting", !playing || !isDisc);
+    }
+  }
+
+  /* ─── preview view switcher ────────────────────────── */
+  function initViewTabs() {
+    $$("[data-pvw-btn]").forEach((btn) => {
+      btn.addEventListener("click", () => switchView(btn.dataset.pvwBtn));
+    });
+  }
+
+  function syncViewTabs() {
+    $$("[data-pvw-btn]").forEach((btn) => {
+      btn.classList.toggle("is-active", btn.dataset.pvwBtn === state.previewView);
+    });
+    const stage = $("#previewStage");
+    if (stage) stage.dataset.pvw = state.previewView;
+    updatePlayState();
+  }
+
+  function switchView(newView) {
+    const old = state.previewView;
+    if (old === newView) return;
+
+    const oldEl = $(`[data-pvw-layer="${old}"]`);
+    const newEl = $(`[data-pvw-layer="${newView}"]`);
+    if (!oldEl || !newEl) return;
+
+    const oldIsDisc = old.startsWith("disc");
+    const newIsDisc = newView.startsWith("disc");
+    const FLIP_DUR  = 180;
+    const SLIDE_DUR = 290;
+
+    // Helper: clean animation classes
+    const cleanAnim = (el) => {
+      ["pvw-anim-flip-out","pvw-anim-flip-in",
+       "pvw-anim-exit-r","pvw-anim-enter-l",
+       "pvw-anim-exit-l","pvw-anim-enter-r"].forEach((c) => el.classList.remove(c));
+    };
+
+    if (oldIsDisc === newIsDisc) {
+      // ── Flip (disc↔disc-back or sleeve↔sleeve-back) ──
+      cleanAnim(oldEl); cleanAnim(newEl);
+      oldEl.classList.add("pvw-anim-flip-out");
+      setTimeout(() => {
+        oldEl.hidden = true;
+        oldEl.classList.remove("pvw-anim-flip-out");
+        newEl.hidden = false;
+        newEl.classList.add("pvw-anim-flip-in");
+        newEl.addEventListener("animationend", () => cleanAnim(newEl), { once: true });
+        state.previewView = newView;
+        syncViewTabs();
+      }, FLIP_DUR);
+    } else {
+      // ── Slide (disc ↔ sleeve) ──
+      const goingToSleeve = !newIsDisc;
+      cleanAnim(oldEl); cleanAnim(newEl);
+      // Update state immediately so tonearm/tabs react right away
+      state.previewView = newView;
+      syncViewTabs();
+      newEl.hidden = false;
+      oldEl.classList.add(goingToSleeve ? "pvw-anim-exit-l" : "pvw-anim-exit-r");
+      newEl.classList.add(goingToSleeve ? "pvw-anim-enter-r" : "pvw-anim-enter-l");
+      const done = () => {
+        oldEl.hidden = true;
+        cleanAnim(oldEl); cleanAnim(newEl);
+      };
+      newEl.addEventListener("animationend", done, { once: true });
+    }
+
   }
 
   /* ─── mobile preview flash ─────────────────────────── */
@@ -226,9 +299,11 @@
       } else {
         set(key, value);
       }
-      // mutual exclusion: funda con diseño ↔ enmarcado (never both, never neither)
+      // mutual exclusion: funda ↔ enmarcado (never both, never neither)
       if (key === "framed" && value === true) {
         state.sleeve = "none";
+      } else if (key === "framed" && value === false && state.sleeve === "none") {
+        state.sleeve = "basic";          // restore default sleeve when removing frame
       } else if (key === "sleeve" && value !== "none") {
         state.framed = false;
       }
@@ -424,7 +499,7 @@
       img.setAttribute("y", -LABEL_R);
       img.setAttribute("width", LABEL_R * 2);
       img.setAttribute("height", LABEL_R * 2);
-      img.setAttribute("clip-path", "url(#labelClipPreview)");
+      img.style.clipPath = "circle(50%)";
       img.setAttribute("preserveAspectRatio", "xMidYMid slice");
       labelGrp.appendChild(img);
     } else {
@@ -433,9 +508,10 @@
       markBot.setAttribute("opacity", "1");
     }
 
-    // custom text (only when no photo)
+    // custom text — always inside the label circle; cream fill when over a photo
     customTxt.textContent = state.labelText ? state.labelText.toUpperCase() : "";
-    customTxt.setAttribute("opacity", state.labelPhotoDataUrl ? "0" : (state.labelText ? "0.9" : "0"));
+    customTxt.setAttribute("opacity", state.labelText ? "0.92" : "0");
+    customTxt.setAttribute("fill", state.labelPhotoDataUrl ? "#F5ECD7" : "#0A0A0A");
 
     // QR hint opacity
     $("[data-qr-hint]").setAttribute("opacity", state.qrEnabled ? "0.85" : "0");
@@ -443,7 +519,18 @@
     // frame overlay
     $("[data-frame-overlay]").setAttribute("opacity", state.framed ? "1" : "0");
 
-    // sleeve mock — scale with disc size
+    // disc-back label radius
+    const labelBgB = $("[data-label-bg-b]");
+    if (labelBgB) labelBgB.setAttribute("r", LABEL_R);
+
+    // tonearm angle via CSS custom property on stage
+    const stageEl = $("#previewStage");
+    if (stageEl) {
+      const playAngle = state.size === "7" ? "-60deg" : "-72deg";
+      stageEl.style.setProperty("--arm-angle", playAngle);
+    }
+
+    // sleeve mock (peeking behind disc in disc-front view)
     const sleeveMock = $("[data-sleeve-mock]");
     const sleeveImg  = $("[data-sleeve-img]");
     const sleeveTxt  = $("[data-sleeve-mock-text]");
@@ -455,6 +542,28 @@
     } else {
       sleeveMock.hidden = true;
     }
+
+    // ── sleeve view layers ──────────────────────────────
+    const hasFront = !!(state.sleeve === "designed" && state.sleeveFrontDataUrl);
+    const hasBack  = !!(state.sleeve === "designed" && state.sleeveBackEnabled && state.sleeveBackDataUrl);
+
+    // front
+    const pvwFrontImg = $("[data-pvw-sleeve-img-front]");
+    const pvwFrontPh  = $("[data-pvw-sleeve-front-ph]");
+    if (pvwFrontImg) {
+      pvwFrontImg.src = hasFront ? state.sleeveFrontDataUrl : "";
+      pvwFrontImg.style.display = hasFront ? "block" : "none";
+    }
+    if (pvwFrontPh) pvwFrontPh.style.display = hasFront ? "none" : "flex";
+
+    // back
+    const pvwBackImg = $("[data-pvw-sleeve-img-back]");
+    const pvwBackPh  = $("[data-pvw-sleeve-back-ph]");
+    if (pvwBackImg) {
+      pvwBackImg.src = hasBack ? state.sleeveBackDataUrl : "";
+      pvwBackImg.style.display = hasBack ? "block" : "none";
+    }
+    if (pvwBackPh) pvwBackPh.style.display = hasBack ? "none" : "flex";
   }
 
   /* ─── receipt render w/ animated total ──────────────── */
@@ -574,9 +683,13 @@
       ].filter((u) => state[u.key]);
       if (uploads.length) {
         container.hidden = false;
-        container.innerHTML = `<p class="tg-imgs__note">Adjuntá estas imágenes al correo que se acaba de abrir:</p>
+        container.innerHTML = `<p class="tg-imgs__note">Descargá cada imagen y adjuntala al correo que se acaba de abrir:</p>
           <div class="tg-imgs__grid">${uploads.map((u) =>
-            `<figure class="tg-imgs__item"><img src="${state[u.key]}" alt="${u.label}" /><figcaption>${u.label}</figcaption></figure>`
+            `<figure class="tg-imgs__item">
+               <img src="${state[u.key]}" alt="${u.label}" />
+               <figcaption>${u.label}</figcaption>
+               <a class="tg-imgs__dl" href="${state[u.key]}" download="vinilomio-${u.key}.jpg">↓ Descargar</a>
+             </figure>`
           ).join("")}</div>`;
       }
     }
@@ -584,175 +697,175 @@
     tg.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
-  /* ─── PDF generation ────────────────────────────────── */
+  /* ─── PDF generation (Y2K Chrome Dream) ────────────── */
   async function downloadPDF() {
     if (!window.jspdf) { alert("La librería PDF aún no cargó. Probá de nuevo en unos segundos."); return; }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: "pt", format: "letter" });
-    const PAGE_W = doc.internal.pageSize.getWidth();
-    const PAGE_H = doc.internal.pageSize.getHeight();
+    const W = doc.internal.pageSize.getWidth();
+    const H = doc.internal.pageSize.getHeight();
 
-    // colors
-    const INK = [10, 10, 10];
-    const CREAM = [245, 236, 215];
-    const CREAM_SOFT = [255, 243, 176];
-    const GOLD = [201, 168, 76];
-    const DIM = [148, 142, 124];
+    // Y2K Chrome Dream palette
+    const INK    = [10,  10,  10 ];
+    const INK2   = [20,  20,  20 ];
+    const YELLOW = [244, 237, 140];
+    const CREAM  = [245, 240, 225];
+    const DIM    = [120, 116, 100];
+    const RULE   = [38,  36,  28 ];
 
-    // background
-    doc.setFillColor(...INK);
-    doc.rect(0, 0, PAGE_W, PAGE_H, "F");
+    // helpers
+    const setY = (color) => doc.setTextColor(...color);
+    const setD = (color) => doc.setDrawColor(...color);
+    const setF = (color) => doc.setFillColor(...color);
 
-    // perforated edge (top + bottom)
-    doc.setFillColor(...CREAM);
-    for (let x = 12; x < PAGE_W - 12; x += 14) {
-      doc.circle(x, 6, 1.6, "F");
-      doc.circle(x, PAGE_H - 6, 1.6, "F");
-    }
+    // ── Full-page black background ────────────────────────
+    setF(INK); doc.rect(0, 0, W, H, "F");
 
-    // header
-    doc.setTextColor(...CREAM_SOFT);
-    doc.setFont("times", "italic");
-    doc.setFontSize(11);
-    doc.text("✦ Vinilo Mío ✦", PAGE_W / 2, 56, { align: "center" });
+    // ── Yellow header band ────────────────────────────────
+    const BAND = 68;
+    setF(YELLOW); doc.rect(0, 0, W, BAND, "F");
 
-    doc.setTextColor(...CREAM);
-    doc.setFont("times", "bold");
-    doc.setFontSize(34);
-    doc.text("ORDEN DE PEDIDO", PAGE_W / 2, 92, { align: "center" });
+    // VM logo circle
+    setF(INK); doc.circle(42, BAND / 2, 22, "F");
+    setD(YELLOW); doc.setLineWidth(2); doc.circle(42, BAND / 2, 22, "S");
+    setY(YELLOW);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(13);
+    doc.text("VM", 42, BAND / 2 + 5, { align: "center" });
 
-    doc.setFont("courier", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(...DIM);
-    doc.text(`Fecha · ${today()}   ·   No. ${Date.now().toString().slice(-6)}`, PAGE_W / 2, 110, { align: "center" });
+    // "vinilomio" wordmark
+    setY(INK);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(26);
+    doc.text("vinilomio", 76, BAND / 2 + 9);
 
-    // gold rule
-    doc.setDrawColor(...GOLD);
-    doc.setLineWidth(1);
-    doc.line(60, 128, PAGE_W - 60, 128);
+    // Right: doc type + date + order number
+    doc.setFont("courier", "bold"); doc.setFontSize(7.5);
+    doc.text("ORDEN DE PEDIDO", W - 36, BAND / 2 - 6, { align: "right" });
+    doc.setFont("courier", "normal"); doc.setFontSize(7);
+    doc.text(`${today()}  ·  #${Date.now().toString().slice(-6)}`, W - 36, BAND / 2 + 6, { align: "right" });
 
-    // customer block
-    let y = 158;
-    doc.setTextColor(...GOLD);
-    doc.setFont("times", "italic");
-    doc.setFontSize(11);
-    doc.text("Cliente", 60, y);
-    y += 18;
-    doc.setTextColor(...CREAM);
-    doc.setFont("courier", "normal");
-    doc.setFontSize(10);
+    // Band bottom border
+    setD(INK); doc.setLineWidth(2); doc.line(0, BAND, W, BAND);
+
+    // Yellow dot row just below band
+    const dotRowY = BAND + 10;
+    setF(YELLOW);
+    for (let x = 24; x < W - 20; x += 16) doc.circle(x, dotRowY, 1.3, "F");
+
+    // ── Customer section ──────────────────────────────────
+    let y = BAND + 32;
+
+    doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    setY(YELLOW);
+    doc.text("01  ·  CLIENTE", 36, y);
+    y += 5;
+    setD(YELLOW); doc.setLineWidth(0.5); doc.line(36, y, 220, y);
+    y += 14;
+
     const c = state.customer;
     const custLines = [
-      ["Nombre",    c.name],
-      ["Email",     c.email],
-      ["Teléfono",  c.phone],
-      ["Dirección", c.address.replace(/\n/g, " · ")],
+      ["Nombre",    c.name    || "—"],
+      ["Email",     c.email   || "—"],
+      ["Teléfono",  c.phone   || "—"],
+      ["Dirección", c.address.replace(/\n/g, " · ") || "—"],
     ];
     if (c.notes) custLines.push(["Notas", c.notes.replace(/\n/g, " · ")]);
+
+    doc.setFont("courier", "normal"); doc.setFontSize(9.5);
     custLines.forEach(([k, v]) => {
-      doc.setTextColor(...DIM);
-      doc.text(k.padEnd(10, " "), 60, y);
-      doc.setTextColor(...CREAM);
-      const wrapped = doc.splitTextToSize(v || "—", 280);
+      setY(DIM);   doc.text(k.padEnd(10), 36, y);
+      setY(CREAM); const wrapped = doc.splitTextToSize(v, 310);
       doc.text(wrapped, 130, y);
-      y += 12 * wrapped.length + 2;
+      y += 13 * wrapped.length + 1;
     });
 
-    // dotted divider
-    y += 8;
-    drawDottedLine(doc, 60, y, PAGE_W - 60, GOLD);
-    y += 16;
+    // ── Divider ───────────────────────────────────────────
+    y += 10;
+    drawDottedLine(doc, 36, y, W - 36, YELLOW); y += 20;
 
-    // order header
-    doc.setTextColor(...GOLD);
-    doc.setFont("times", "italic");
-    doc.setFontSize(11);
-    doc.text("Pedido", 60, y);
-    y += 18;
+    // ── Order section ─────────────────────────────────────
+    doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    setY(YELLOW);
+    doc.text("02  ·  PEDIDO", 36, y);
+    y += 5;
+    setD(YELLOW); doc.setLineWidth(0.5); doc.line(36, y, 200, y);
+    y += 14;
 
-    // line items
-    doc.setFont("courier", "normal");
-    doc.setFontSize(10);
+    doc.setFont("courier", "normal"); doc.setFontSize(9.5);
     lineItems().forEach((it) => {
-      doc.setTextColor(...CREAM);
-      const label = it.label;
-      const wrappedLabel = doc.splitTextToSize(label, 340);
-      doc.text(wrappedLabel, 60, y);
-      doc.setTextColor(...CREAM_SOFT);
-      doc.text(`$${fmt(it.amount)}`, PAGE_W - 60, y, { align: "right" });
-      y += 12 * wrappedLabel.length;
+      setY(CREAM);
+      const lbl = doc.splitTextToSize(it.label, 350);
+      doc.text(lbl, 36, y);
+      setY(YELLOW);
+      doc.text(`$${fmt(it.amount)}`, W - 36, y, { align: "right" });
+      y += 13 * lbl.length;
       if (it.sub) {
-        doc.setTextColor(...DIM);
-        doc.setFontSize(8.5);
-        const sub = doc.splitTextToSize("↳ " + it.sub, 340);
-        doc.text(sub, 70, y);
+        setY(DIM); doc.setFontSize(8);
+        const sub = doc.splitTextToSize("↳ " + it.sub, 350);
+        doc.text(sub, 46, y);
         y += 10 * sub.length;
-        doc.setFontSize(10);
+        doc.setFontSize(9.5);
       }
-      // dotted between items
-      drawDottedLine(doc, 60, y + 2, PAGE_W - 60, [70, 65, 56]);
-      y += 12;
+      drawDottedLine(doc, 36, y + 2, W - 36, RULE); y += 12;
     });
 
-    // label text addendum
     if (state.labelText) {
-      doc.setTextColor(...DIM);
-      doc.setFontSize(9);
-      doc.text(`Texto en la etiqueta: "${state.labelText}"`, 60, y);
-      y += 16;
+      setY(DIM); doc.setFontSize(8.5);
+      doc.text(`Texto en etiqueta: "${state.labelText}"`, 36, y);
+      y += 14;
     }
 
-    // total
+    // ── Total ─────────────────────────────────────────────
     y += 6;
-    doc.setDrawColor(...GOLD);
-    doc.setLineWidth(1.2);
-    doc.line(60, y, PAGE_W - 60, y);
-    y += 22;
-    doc.setTextColor(...CREAM);
-    doc.setFont("times", "bold");
-    doc.setFontSize(18);
-    doc.text("TOTAL", 60, y);
-    doc.setTextColor(...CREAM_SOFT);
-    doc.text(`$${fmt(total())} MXN`, PAGE_W - 60, y, { align: "right" });
-    y += 30;
+    setD(YELLOW); doc.setLineWidth(1.5); doc.line(36, y, W - 36, y);
+    y += 20;
+    setY(CREAM); doc.setFont("helvetica", "bold"); doc.setFontSize(22);
+    doc.text("TOTAL", 36, y);
+    setY(YELLOW); doc.setFontSize(28);
+    doc.text(`$${fmt(total())} MXN`, W - 36, y, { align: "right" });
+    y += 32;
 
-    // vinyl snapshot
+    // ── Vinyl snapshot ────────────────────────────────────
     try {
       const svgEl = $(".vinyl--preview");
       if (svgEl && window.html2canvas) {
         const wrapper = document.createElement("div");
-        wrapper.style.cssText = "position:fixed;left:-9999px;top:0;width:360px;background:#0A0A0A;padding:10px;";
+        wrapper.style.cssText = "position:fixed;left:-9999px;top:0;width:320px;background:#0A0A0A;padding:8px;border-radius:50%;overflow:hidden;";
         const clone = svgEl.cloneNode(true);
         clone.removeAttribute("style");
-        clone.setAttribute("width", "340");
-        clone.setAttribute("height", "340");
+        clone.setAttribute("width",  "304");
+        clone.setAttribute("height", "304");
+        // pause animation so we get a clean snapshot
+        clone.style.animation = "none";
         wrapper.appendChild(clone);
         document.body.appendChild(wrapper);
         const canvas = await window.html2canvas(wrapper, { backgroundColor: "#0A0A0A", scale: 2, logging: false });
         document.body.removeChild(wrapper);
         const dataUrl = canvas.toDataURL("image/png");
-        const imgW = 140;
-        const imgH = 140;
-        const remaining = PAGE_H - y - 100;
-        if (remaining < imgH) { doc.addPage(); y = 60; doc.setFillColor(...INK); doc.rect(0,0,PAGE_W,PAGE_H,"F"); }
-        doc.addImage(dataUrl, "PNG", (PAGE_W - imgW) / 2, y, imgW, imgH);
-        y += imgH + 14;
+        const imgW = 130; const imgH = 130;
+        if (H - y - 80 < imgH) { doc.addPage(); y = 60; setF(INK); doc.rect(0,0,W,H,"F"); }
+        const imgX = (W - imgW) / 2;
+        // yellow glow ring behind vinyl
+        setF([50, 47, 20]); doc.circle(imgX + imgW / 2, y + imgH / 2, imgW / 2 + 8, "F");
+        doc.addImage(dataUrl, "PNG", imgX, y, imgW, imgH);
+        // ✦ flankers
+        setY(YELLOW); doc.setFont("helvetica", "bold"); doc.setFontSize(16);
+        doc.text("✦", imgX - 22, y + imgH / 2 + 6);
+        doc.text("✦", imgX + imgW + 8, y + imgH / 2 + 6);
+        y += imgH + 12;
       }
     } catch (err) { console.warn("Vinyl snapshot skipped:", err); }
 
-    // footer
-    const footY = PAGE_H - 50;
-    doc.setDrawColor(...GOLD);
-    doc.setLineWidth(0.5);
-    doc.line(80, footY - 16, PAGE_W - 80, footY - 16);
-    doc.setTextColor(...GOLD);
-    doc.setFont("times", "italic");
-    doc.setFontSize(11);
-    doc.text("Hecho con amor · CDMX · vinilomio.mx", PAGE_W / 2, footY, { align: "center" });
-    doc.setFont("courier", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(...DIM);
-    doc.text("★ ★ ★", PAGE_W / 2, footY + 14, { align: "center" });
+    // ── Yellow footer band ────────────────────────────────
+    const FOOT_H  = 42;
+    const footTop = H - FOOT_H;
+    // dot row above footer
+    setF(YELLOW);
+    for (let x = 24; x < W - 20; x += 16) doc.circle(x, footTop - 8, 1.3, "F");
+    // band
+    setF(YELLOW); doc.rect(0, footTop, W, FOOT_H, "F");
+    setD(INK); doc.setLineWidth(2); doc.line(0, footTop, W, footTop);
+    setY(INK); doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+    doc.text("Hecho con amor  ·  CDMX  ·  vinilomio.mx", W / 2, footTop + 26, { align: "center" });
 
     const fname = `vinilomio-pedido-${slugify(state.customer.name)}-${new Date().toISOString().slice(0,10)}.pdf`;
     doc.save(fname);
@@ -791,6 +904,7 @@
     initUploads();
     initActions();
     initPlayBtn();
+    initViewTabs();
     render();
   }
 

@@ -375,9 +375,18 @@
           <span class="preview-card__meta" data-preview-meta>12" · sin funda</span>
         </div>
 
-        <div class="preview-stage" id="previewStage">
-          <!-- Tonearm overlay -->
-          <div class="tonearm-wrap" aria-hidden="true">
+        <div class="preview-stage" id="previewStage" data-pvw="disc-front">
+
+          <!-- ── View tabs ── -->
+          <nav class="pvw-tabs" aria-label="Cambiar vista">
+            <button class="pvw-tab is-active" data-pvw-btn="disc-front"  title="Cara A">⊙</button>
+            <button class="pvw-tab"            data-pvw-btn="disc-back"   title="Cara B">◎</button>
+            <button class="pvw-tab"            data-pvw-btn="sleeve-front" title="Funda · frente">▣</button>
+            <button class="pvw-tab"            data-pvw-btn="sleeve-back"  title="Funda · dorso">▦</button>
+          </nav>
+
+          <!-- ── Tonearm (disc views only) ── -->
+          <div class="tonearm-wrap" data-tonearm aria-hidden="true">
             <div class="tonearm-pivot"></div>
             <div class="tonearm-inner"></div>
             <div class="tonearm-arm">
@@ -386,62 +395,106 @@
               </div>
             </div>
           </div>
-          <!-- Play / Pause -->
+
+          <!-- ── Play / Pause (disc views only) ── -->
           <button type="button" class="play-btn" aria-label="Pausar / reproducir" data-play-btn>❚❚</button>
-          <!-- Sleeve mockup (behind disc) -->
-          <div class="sleeve-mock" data-sleeve-mock hidden>
-            <img alt="" data-sleeve-img />
-            <div class="sleeve-mock__text" data-sleeve-mock-text></div>
+
+          <!-- ── Capa: Disco cara A ── -->
+          <div class="pvw-layer pvw-layer--disc-front" data-pvw-layer="disc-front">
+            <!-- Sleeve mock peeking behind disc -->
+            <div class="sleeve-mock" data-sleeve-mock hidden>
+              <img alt="" data-sleeve-img />
+              <div class="sleeve-mock__text" data-sleeve-mock-text></div>
+            </div>
+            <svg class="vinyl vinyl--preview" viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <radialGradient id="discShine2" cx="50%" cy="40%" r="60%">
+                  <stop offset="0%"  stop-color="#1c1c1c" />
+                  <stop offset="60%" stop-color="#0d0d0d" />
+                  <stop offset="100%" stop-color="#050505" />
+                </radialGradient>
+                <radialGradient id="discHighlight2" cx="35%" cy="30%" r="40%">
+                  <stop offset="0%"  stop-color="rgba(255,255,255,0.10)" />
+                  <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+                </radialGradient>
+                <clipPath id="labelClipPreview"><circle r="60" cx="0" cy="0" /></clipPath>
+              </defs>
+              <circle r="190" fill="url(#discShine2)" />
+              <circle r="190" fill="url(#discHighlight2)" />
+              <g class="vinyl__grooves" data-grooves></g>
+              <g data-label-group>
+                <circle r="60" fill="#F4ED8C" data-label-bg />
+                <text class="vinyl__wordmark vinyl__wordmark--top"    x="0" y="-12" text-anchor="middle" data-label-mark-top>Vinilo</text>
+                <text class="vinyl__wordmark vinyl__wordmark--bottom" x="0" y="32"  text-anchor="middle" data-label-mark-bottom>Mío</text>
+              </g>
+              <text class="vinyl__custom" x="0" y="78" text-anchor="middle" data-label-text></text>
+              <g data-qr-hint transform="translate(85,0)" opacity="0">
+                <rect x="-12" y="-12" width="24" height="24" fill="#0A0A0A" stroke="#F5ECD7" stroke-width="0.5"/>
+                <rect x="-9"  y="-9"  width="6" height="6" fill="#F5ECD7"/>
+                <rect x="3"   y="-9"  width="6" height="6" fill="#F5ECD7"/>
+                <rect x="-9"  y="3"   width="6" height="6" fill="#F5ECD7"/>
+                <rect x="3"   y="3"   width="2" height="2" fill="#F5ECD7"/>
+                <rect x="7"   y="3"   width="2" height="2" fill="#F5ECD7"/>
+                <rect x="3"   y="7"   width="2" height="2" fill="#F5ECD7"/>
+              </g>
+              <g data-frame-overlay opacity="0">
+                <rect x="-198" y="-198" width="396" height="396" fill="none" stroke="#1a1208" stroke-width="14"/>
+                <rect x="-191" y="-191" width="382" height="382" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+              </g>
+              <circle r="3" fill="#0A0A0A" />
+            </svg>
           </div>
 
-          <!-- Vinyl preview SVG -->
-          <svg class="vinyl vinyl--preview" viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs>
-              <radialGradient id="discShine2" cx="50%" cy="40%" r="60%">
-                <stop offset="0%"  stop-color="#1c1c1c" />
-                <stop offset="60%" stop-color="#0d0d0d" />
-                <stop offset="100%" stop-color="#050505" />
-              </radialGradient>
-              <radialGradient id="discHighlight2" cx="35%" cy="30%" r="40%">
-                <stop offset="0%"  stop-color="rgba(255,255,255,0.10)" />
-                <stop offset="100%" stop-color="rgba(255,255,255,0)" />
-              </radialGradient>
-              <clipPath id="labelClipPreview"><circle r="60" cx="0" cy="0" /></clipPath>
-            </defs>
+          <!-- ── Capa: Disco cara B ── -->
+          <div class="pvw-layer pvw-layer--disc-back" data-pvw-layer="disc-back" hidden>
+            <svg class="vinyl vinyl--preview" viewBox="-200 -200 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <radialGradient id="discShineB" cx="50%" cy="40%" r="60%">
+                  <stop offset="0%"  stop-color="#1c1c1c" />
+                  <stop offset="60%" stop-color="#0d0d0d" />
+                  <stop offset="100%" stop-color="#050505" />
+                </radialGradient>
+                <radialGradient id="discHighlightB" cx="65%" cy="70%" r="40%">
+                  <stop offset="0%"  stop-color="rgba(255,255,255,0.08)" />
+                  <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+                </radialGradient>
+              </defs>
+              <circle r="190" fill="url(#discShineB)" />
+              <circle r="190" fill="url(#discHighlightB)" />
+              <g class="vinyl__grooves" data-grooves></g>
+              <circle r="60" fill="#111" data-label-bg-b />
+              <text class="vinyl__custom" x="0" y="-16" text-anchor="middle"
+                fill="rgba(244,237,140,0.55)" style="font-size:9px;letter-spacing:0.22em">LADO</text>
+              <text x="0" y="26" text-anchor="middle" fill="#F4ED8C"
+                style="font-family:var(--f-display);font-size:44px">B</text>
+              <circle r="3" fill="#0A0A0A" />
+            </svg>
+          </div>
 
-            <circle r="190" fill="url(#discShine2)" />
-            <circle r="190" fill="url(#discHighlight2)" />
-            <g class="vinyl__grooves" data-grooves></g>
+          <!-- ── Capa: Funda delantera ── -->
+          <div class="pvw-layer pvw-layer--sleeve-front" data-pvw-layer="sleeve-front" hidden>
+            <div class="pvw-sleeve-card" data-pvw-sleeve-front>
+              <img class="pvw-sleeve-card__img" alt="Portada delantera" data-pvw-sleeve-img-front />
+              <div class="pvw-sleeve-card__ph" data-pvw-sleeve-front-ph>
+                <span class="pvw-sleeve-card__ph-icon">▣</span>
+                <span class="pvw-sleeve-card__ph-txt">Sube tu portada<br>en el paso de la funda</span>
+              </div>
+              <div class="pvw-sleeve-card__badge">FRENTE</div>
+            </div>
+          </div>
 
-            <!-- Label area (image OR solid + wordmark) -->
-            <g data-label-group>
-              <circle r="60" fill="#F4ED8C" data-label-bg />
-              <text class="vinyl__wordmark vinyl__wordmark--top"    x="0" y="-12" text-anchor="middle" data-label-mark-top>Vinilo</text>
-              <text class="vinyl__wordmark vinyl__wordmark--bottom" x="0" y="32"  text-anchor="middle" data-label-mark-bottom>Mío</text>
-            </g>
+          <!-- ── Capa: Funda trasera ── -->
+          <div class="pvw-layer pvw-layer--sleeve-back" data-pvw-layer="sleeve-back" hidden>
+            <div class="pvw-sleeve-card pvw-sleeve-card--back" data-pvw-sleeve-back>
+              <img class="pvw-sleeve-card__img" alt="Portada trasera" data-pvw-sleeve-img-back />
+              <div class="pvw-sleeve-card__ph" data-pvw-sleeve-back-ph>
+                <span class="pvw-sleeve-card__ph-icon">▦</span>
+                <span class="pvw-sleeve-card__ph-txt">Sube tu portada trasera<br>en el paso de la funda</span>
+              </div>
+              <div class="pvw-sleeve-card__badge">DORSO</div>
+            </div>
+          </div>
 
-            <!-- Custom text under wordmark -->
-            <text class="vinyl__custom" x="0" y="78" text-anchor="middle" data-label-text></text>
-
-            <!-- QR icon hint -->
-            <g data-qr-hint transform="translate(85,0)" opacity="0">
-              <rect x="-12" y="-12" width="24" height="24" fill="#0A0A0A" stroke="#F5ECD7" stroke-width="0.5"/>
-              <rect x="-9"  y="-9"  width="6" height="6" fill="#F5ECD7"/>
-              <rect x="3"   y="-9"  width="6" height="6" fill="#F5ECD7"/>
-              <rect x="-9"  y="3"   width="6" height="6" fill="#F5ECD7"/>
-              <rect x="3"   y="3"   width="2" height="2" fill="#F5ECD7"/>
-              <rect x="7"   y="3"   width="2" height="2" fill="#F5ECD7"/>
-              <rect x="3"   y="7"   width="2" height="2" fill="#F5ECD7"/>
-            </g>
-
-            <!-- Frame overlay -->
-            <g data-frame-overlay opacity="0">
-              <rect x="-198" y="-198" width="396" height="396" fill="none" stroke="#1a1208" stroke-width="14"/>
-              <rect x="-191" y="-191" width="382" height="382" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-            </g>
-
-            <circle r="3" fill="#0A0A0A" />
-          </svg>
         </div>
 
         <!-- Receipt -->

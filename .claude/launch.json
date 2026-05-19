@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "vinilomio",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["-c", "cd /Users/matiashidalgo/Documents/apps_cool/vinilomio && exec python3 -m http.server 5577 --bind 127.0.0.1"],
+      "port": 5577
+    }
+  ]
+}

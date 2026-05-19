@@ -988,7 +988,14 @@ body::after {
   width: 50%; height: 50%;
   pointer-events: none;
   z-index: 4;
+  transition: opacity 400ms var(--ease);
 }
+/* Hide tonearm + play btn on sleeve views */
+.preview-stage[data-pvw^="sleeve"] .tonearm-wrap,
+.preview-stage[data-pvw^="sleeve"] .play-btn {
+  opacity: 0; pointer-events: none;
+}
+
 .tonearm-pivot {
   position: absolute;
   top: 2%; right: 2%;
@@ -1011,11 +1018,12 @@ body::after {
   background: linear-gradient(180deg, #f4f7fa 0%, #cfcfcf 40%, #6a7585 100%);
   border-radius: 999px;
   transform-origin: right center;
-  transform: rotate(-28deg);
+  /* default: 12" playing position — outer groove */
+  transform: rotate(var(--arm-angle, -72deg));
   box-shadow: 0 3px 8px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.55);
-  transition: transform 0.8s cubic-bezier(.7,-.1,.2,1.4);
+  transition: transform 0.9s cubic-bezier(.6,-.1,.25,1.3);
 }
-.tonearm-arm.is-resting { transform: rotate(-55deg); }
+.tonearm-arm.is-resting { transform: rotate(-92deg) !important; }
 .tonearm-head {
   position: absolute;
   left: -6%;
@@ -1049,7 +1057,7 @@ body::after {
   cursor: pointer;
   z-index: 5;
   pointer-events: auto;
-  transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+  transition: transform 200ms var(--ease), box-shadow 200ms var(--ease), opacity 350ms var(--ease);
 }
 .play-btn:hover {
   transform: scale(1.06);
@@ -1236,6 +1244,17 @@ body::after {
   opacity: 0.55;
   text-align: center;
 }
+.tg-imgs__dl {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  color: var(--brand-yellow);
+  text-decoration: none;
+  border: 1px solid var(--brand-yellow);
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+  letter-spacing: 0.04em;
+}
+.tg-imgs__dl:hover { background: var(--brand-yellow); color: var(--ink); }
 .telegram__cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
 /* ─── footer ─────────────────────────────────────────── */
@@ -1327,3 +1346,170 @@ body::after {
   }
   [data-reveal] { opacity: 1; transform: none; }
 }
+
+/* ═══════════════════════════════════════════════════════
+   PREVIEW VIEW SYSTEM
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── view tabs ──────────────────────────────────────── */
+.pvw-tabs {
+  position: absolute;
+  bottom: 0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  background: rgba(10,10,10,0.82);
+  border: 1px solid rgba(244,237,140,0.18);
+  border-radius: 999px;
+  padding: 4px;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.pvw-tab {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  color: var(--dim);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 220ms var(--ease), color 220ms var(--ease), transform 220ms var(--ease);
+  line-height: 1;
+}
+.pvw-tab:hover { color: var(--cream); background: rgba(244,237,140,0.08); }
+.pvw-tab.is-active {
+  background: var(--brand-yellow);
+  color: var(--brand-black);
+  transform: scale(1.05);
+}
+
+/* ─── pvw layers ─────────────────────────────────────── */
+.pvw-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* padding-bottom accounts for the tabs strip */
+  padding-bottom: 2.8rem;
+}
+.pvw-layer[hidden] { display: none; }
+
+/* Disc layers — let the vinyl size itself naturally */
+.pvw-layer--disc-front,
+.pvw-layer--disc-back {
+  pointer-events: none;
+}
+/* forward pointer events to play btn inside disc-front */
+.pvw-layer--disc-front { pointer-events: none; }
+
+/* Sleeve layers */
+.pvw-layer--sleeve-front,
+.pvw-layer--sleeve-back {
+  z-index: 3;
+}
+
+/* ─── sleeve card ────────────────────────────────────── */
+.pvw-sleeve-card {
+  position: relative;
+  width: clamp(160px, 72%, 260px);
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--ink-2);
+  border: 1px solid rgba(244,237,140,0.22);
+  box-shadow: 0 20px 50px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.pvw-sleeve-card--back {
+  background: var(--ink-1);
+  border-color: rgba(244,237,140,0.14);
+}
+.pvw-sleeve-card__img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.pvw-sleeve-card__img[src=""] { display: none; }
+.pvw-sleeve-card__ph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 1rem;
+}
+.pvw-sleeve-card__ph-icon {
+  font-size: 2rem;
+  color: rgba(244,237,140,0.25);
+}
+.pvw-sleeve-card__ph-txt {
+  font-family: var(--f-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  line-height: 1.5;
+}
+.pvw-sleeve-card__badge {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.6rem;
+  font-family: var(--f-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand-yellow);
+  background: rgba(0,0,0,0.65);
+  border: 1px solid rgba(244,237,140,0.3);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}
+
+/* ─── transition keyframes ───────────────────────────── */
+
+/* Coin-flip (disc↔disc-back, sleeve↔sleeve-back) */
+@keyframes pvwFlipOut {
+  0%   { transform: scaleX(1); }
+  100% { transform: scaleX(0); opacity: 0.4; }
+}
+@keyframes pvwFlipIn {
+  0%   { transform: scaleX(0); opacity: 0.4; }
+  100% { transform: scaleX(1); }
+}
+
+/* Slide (disc ↔ sleeve) */
+@keyframes pvwExitRight {
+  0%   { transform: translateX(0);    opacity: 1; }
+  100% { transform: translateX(65%);  opacity: 0; }
+}
+@keyframes pvwEnterLeft {
+  0%   { transform: translateX(-65%); opacity: 0; }
+  100% { transform: translateX(0);    opacity: 1; }
+}
+@keyframes pvwExitLeft {
+  0%   { transform: translateX(0);    opacity: 1; }
+  100% { transform: translateX(-65%); opacity: 0; }
+}
+@keyframes pvwEnterRight {
+  0%   { transform: translateX(65%);  opacity: 0; }
+  100% { transform: translateX(0);    opacity: 1; }
+}
+
+/* Animation helper classes (applied by JS) */
+.pvw-anim-flip-out  { animation: pvwFlipOut  180ms ease forwards; }
+.pvw-anim-flip-in   { animation: pvwFlipIn   180ms ease forwards; }
+.pvw-anim-exit-r    { animation: pvwExitRight  280ms var(--ease) forwards; }
+.pvw-anim-enter-l   { animation: pvwEnterLeft  280ms var(--ease) forwards; }
+.pvw-anim-exit-l    { animation: pvwExitLeft   280ms var(--ease) forwards; }
+.pvw-anim-enter-r   { animation: pvwEnterRight 280ms var(--ease) forwards; }
+
+/* ─── 7" adjustment for tonearm ──────────────────────── */
+.preview-stage[data-size="7"] { --arm-angle: -60deg; }
