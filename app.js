@@ -893,6 +893,181 @@
     });
   }
 
+  /* ─── scroll transition (hero → about) ─────────────── */
+  function initScrollAnimation() {
+    if (!window.gsap || !window.ScrollTrigger) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const hero      = document.getElementById("hero");
+    const vinylWrap = hero.querySelector(".hero__vinyl-wrap");
+    const vinylSvg  = vinylWrap.querySelector(".vinyl--hero"); // has vmSpin CSS anim
+    const vinylGlow = vinylWrap.querySelector(".vinyl-glow");  // has vmFloat CSS anim
+    const heroCopy  = hero.querySelector(".hero__copy");
+    const ctaRow    = hero.querySelector(".hero__cta-row");
+    const stickers  = hero.querySelectorAll(".sticker");
+    const hint      = hero.querySelector(".hero__hint");
+    const marquee   = hero.querySelector(".marquee-strip");
+    const brand     = hero.querySelector(".hero__brand");
+    const below     = document.getElementById("about");
+
+    if (!vinylWrap) return;
+
+    // Snapshot the vinyl's natural position BEFORE any GSAP transform touches it.
+    const { left, top, width, height } = vinylWrap.getBoundingClientRect();
+    const dx = window.innerWidth  / 2 - (left + width  / 2);
+    const dy = window.innerHeight / 2 - (top  + height / 2);
+
+    // Promote vinylWrap to its own GPU compositor layer immediately.
+    gsap.set(vinylWrap, { transformOrigin: "50% 50%", force3D: true });
+
+    const vph = window.innerHeight; // exact pixels — avoids string parsing per frame
+
+    // About section becomes a full-viewport fixed panel that slides up from below.
+    // z-index 200 > GSAP pin z-index 100 → paints above the hero.
+    // will-change + force3D → own GPU layer from the start (no promotion cost later).
+    let belowFixed = false;
+    if (below) {
+      below.style.willChange = "transform, opacity";
+      gsap.set(below, {
+        position: "fixed",
+        top: 0, left: 0, right: 0,
+        height: vph,           // pixel value — no layout recalc per frame
+        y: vph,                // start fully below the viewport
+        zIndex: 200,
+        autoAlpha: 0,
+        backgroundColor: "#0a0a0a",
+        force3D: true,
+      });
+      belowFixed = true;
+    }
+
+    // Pause / resume the CSS animations that compete with GSAP's parent transforms.
+    // vmSpin & vmFloat both set transform on children inside vinylWrap — pausing
+    // them eliminates the need to re-composite those layers every frame.
+    const pauseVinylCSS = () => {
+      if (vinylSvg)  {
+        vinylSvg.style.animationPlayState  = "paused";
+        // Reduce expensive drop-shadow at large scales (cheaper to re-blur a small one)
+        vinylSvg.style.filter = "drop-shadow(0 6px 20px rgba(0,0,0,.5))";
+      }
+      if (vinylGlow) vinylGlow.style.animationPlayState = "paused";
+    };
+    const resumeVinylCSS = () => {
+      if (vinylSvg)  { vinylSvg.style.animationPlayState = ""; vinylSvg.style.filter = ""; }
+      if (vinylGlow) vinylGlow.style.animationPlayState = "";
+    };
+
+    let soundPlayed = false;
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: hero,
+        start: "top top",
+        end: "+=55%",         // 0.55 viewport-heights — done in a short flick
+        pin: true,
+        pinSpacing: false,    // no spacer added — about section stays at its natural position
+        scrub: 0.25,          // inertia sweet-spot: responsive yet physically smooth
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onEnter() {
+          document.body.classList.add("scroll-anim-active");
+          pauseVinylCSS();
+          if (!soundPlayed) { playNeedleDrop(); soundPlayed = true; }
+        },
+        onLeave() {
+          document.body.classList.remove("scroll-anim-active");
+          resumeVinylCSS();
+          if (below && belowFixed) {
+            below.style.willChange = "";
+            gsap.set(below, {
+              clearProps: "position,top,left,right,zIndex,height,backgroundColor,transform,opacity,visibility",
+            });
+            belowFixed = false;
+            // Instantly jump scroll to the about section's natural position.
+            // The user already sees the fixed overlay at full opacity, so the
+            // instant repositioning is imperceptible — they land seamlessly on
+            // the real about section with no gap or duplicate.
+            requestAnimationFrame(() => {
+              window.scrollTo({ top: below.offsetTop, behavior: "instant" });
+            });
+          }
+        },
+        onLeaveBack() {
+          document.body.classList.remove("scroll-anim-active");
+          resumeVinylCSS();
+        },
+        onEnterBack() {
+          document.body.classList.add("scroll-anim-active");
+          pauseVinylCSS();
+          // Re-apply fixed panel for reverse scroll — y/opacity controlled by tween
+          if (below && !belowFixed) {
+            below.style.willChange = "transform, opacity";
+            gsap.set(below, {
+              position: "fixed",
+              top: 0, left: 0, right: 0,
+              height: vph,
+              zIndex: 200,
+              backgroundColor: "#0a0a0a",
+              force3D: true,
+            });
+            belowFixed = true;
+          }
+        },
+      },
+    });
+
+    // ── Phase 1 (0→12%): hero chrome exits immediately ──
+    tl.to([heroCopy, ctaRow, hint], {
+      opacity: 0, y: -14, duration: 0.12, stagger: 0.02, ease: "power1.in",
+    }, 0);
+    tl.to(stickers, {
+      opacity: 0, scale: 0.85, duration: 0.10, stagger: 0.02, ease: "power1.in",
+    }, 0);
+    tl.to([marquee, brand], { opacity: 0, duration: 0.08 }, 0);
+
+    // ── Phase 2 (5→85%): vinyl blooms to viewport center ──
+    tl.to(vinylWrap, {
+      x: dx, y: dy, scale: 3.5,
+      ease: "power2.inOut", duration: 0.80, force3D: true,
+    }, 0.05);
+
+    // ── Phase 3 (20→95%): about panel slides up from below ──
+    // Starts rising while the vinyl is still growing — no dark gap between sections.
+    if (below) {
+      tl.to(below, {
+        y: 0, autoAlpha: 1,
+        duration: 0.75, ease: "power3.out", force3D: true,
+      }, 0.20);
+    }
+
+    // Vinyl fades once the panel is dominant
+    tl.to(vinylWrap, { opacity: 0, duration: 0.50, ease: "power1.in" }, 0.40);
+  }
+
+  /* ─── needle-drop sound (Web Audio) ────────────────────── */
+  function playNeedleDrop() {
+    try {
+      const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+      const sr   = ctx.sampleRate;
+      const buf  = ctx.createBuffer(1, Math.floor(sr * 0.14), sr);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 2.8) * 0.40;
+      }
+      const src  = ctx.createBufferSource();
+      src.buffer = buf;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.14);
+      src.connect(gain);
+      gain.connect(ctx.destination);
+      src.start();
+      setTimeout(() => ctx.close(), 600);
+    } catch (_) { /* AudioContext not available */ }
+  }
+
   /* ─── boot ──────────────────────────────────────────── */
   function init() {
     paintGrooves();
@@ -905,6 +1080,7 @@
     initActions();
     initPlayBtn();
     initViewTabs();
+    initScrollAnimation();
     render();
   }
 
